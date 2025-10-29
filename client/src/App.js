@@ -13,7 +13,7 @@ function App() {
   // connect to websocket when component mounts
   useEffect(() => {
     console.log("Connecting to WebSocket...");
-    const websocket = new WebSocket("ws://localhost:8081");
+    const websocket = new WebSocket("wss://tictactoe-odd-even.onrender.com");
 
     websocket.onopen = () => {
       console.log("Connected to server");
