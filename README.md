@@ -2,6 +2,9 @@
 
 A distributed multiplayer game demonstrating real-time synchronization and concurrent actions handling. Two players compete to create lines of odd or even numbers, while the server maintains consistency across all clients.
 
+## Link
+- https://tictactoe-odd-even.vercel.app/
+  
 ## Key Distributed System Concepts
 
 - **Server Authority**: Server is the single source of truth for game state
