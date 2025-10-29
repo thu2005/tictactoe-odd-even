@@ -1,70 +1,101 @@
-# Getting Started with Create React App
+# Odd-Even Tic Tac Toe
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A distributed multiplayer game demonstrating real-time synchronization and concurrent actions handling. Two players compete to create lines of odd or even numbers, while the server maintains consistency across all clients.
 
-## Available Scripts
+## Key Distributed System Concepts
 
-In the project directory, you can run:
+- **Server Authority**: Server is the single source of truth for game state
+- **Concurrent Actions**: Both players can click simultaneously without conflicts
+- **Real-time Synchronization**: All clients stay in sync through WebSocket
+- **Operational Transforms**: Using operations (INCREMENT) instead of states prevents race conditions
 
-### `npm start`
+## Game Rules
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- 5x5 board, all squares start at 0
+- First player is ODD, second player is EVEN
+- Click any square to increment its number
+- Both players can click simultaneously
+- ODD player wins: Get a line of 5 odd numbers
+- EVEN player wins: Get a line of 5 even numbers
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Implementation Highlights
 
-### `npm test`
+### Distributed System Architecture
+- Server maintains authoritative game state
+- Clients send operations, not states (INCREMENT vs SET_VALUE)
+- Server processes actions sequentially to maintain consistency
+- All updates are broadcasted to maintain synchronization
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### Tech Stack
+- Frontend: React (UI + WebSocket client)
+- Backend: Node.js with WebSocket (Game state & logic)
+- Protocol: WebSocket (Real-time bidirectional communication)
 
-### `npm run build`
+## Getting Started
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+1. Install dependencies:
+```bash
+# Install server dependencies
+cd server
+npm install
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+# Install client dependencies
+cd ../client
+npm install
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+2. Start the server:
+```bash
+cd server
+node index.js
+```
 
-### `npm run eject`
+3. Start the client:
+```bash
+cd client
+npm start
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+4. Open in browser:
+- Open http://localhost:3000 in two browser tabs
+- First tab = ODD player
+- Second tab = EVEN player
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## How It Works
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### Game Flow
+1. Server starts, waiting for WebSocket connections
+2. First client connects → assigned as ODD player
+3. Second client connects → assigned as EVEN player
+4. Players click squares → send INCREMENT operations
+5. Server:
+   - Processes each operation in order
+   - Updates game state
+   - Broadcasts new state to all clients
+6. Clients update UI only after server confirmation
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+### Example: Handling Concurrent Clicks
+```
+Initial state: Square(12) = 5
 
-## Learn More
+Time    Player    Action           Server    Result
+0ms     ODD      Click Square 12  5 → 6     Both clients see 6
+50ms    EVEN     Click Square 12  6 → 7     Both clients see 7
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+✓ Both clicks processed
+✓ All clients in sync
+✓ No race conditions
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## Project Structure
 
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+```
+├── client/           # React frontend
+│   ├── src/         
+│   │   ├── App.js   # Game UI and WebSocket client
+│   │   └── App.css  # Styles
+│   └── package.json
+└── server/          
+    ├── index.js     # WebSocket server & game logic
+    └── package.json
+```
