@@ -91,5 +91,22 @@ wss.on("connection", (ws) => {
 
   ws.on("close", () => {
     console.log("Client disconnected");
+
+    // reset player slots
+    if (players.odd === ws) {
+      players.odd = null;
+      console.log("ODD player left");
+    }
+    if (players.even === ws) {
+      players.even = null;
+      console.log("EVEN player left");
+    }
+
+    // reset game if any player leaves
+    if (!players.odd || !players.even) {
+      gameStatus = "waiting";
+      board = Array(25).fill(0);
+      console.log("Game reset - waiting for players");
+    }
   });
 });
