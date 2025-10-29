@@ -1,7 +1,18 @@
 const WebSocket = require("ws");
 
-const wss = new WebSocket.Server({ port: 8081 });
-console.log("WebSocket server started on ws://localhost:8081");
+const PORT = process.env.PORT || 8081;
+const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:3000";
+
+// Setup WebSocket server with CORS
+const wss = new WebSocket.Server({ 
+  port: PORT,
+  cors: {
+    origin: CLIENT_URL,
+    methods: ["GET", "POST"]
+  }
+});
+
+console.log(`WebSocket server started on port ${PORT}`);
 
 let board = Array(25).fill(0);
 let players = { odd: null, even: null };
