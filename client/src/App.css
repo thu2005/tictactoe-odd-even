@@ -1,38 +1,188 @@
 .App {
   text-align: center;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+  background-color: #1a1a1a;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 .App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+  width: 100%;
+  max-width: 800px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 40px;
+  padding: 20px;
+}
+
+/* Game Info Section */
+.game-info {
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  padding: 20px;
+}
+
+.game-info h1 {
+  margin: 0 0 20px 0;
+  font-size: 24px;
+  font-weight: 500;
+}
+
+.info {
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.info p {
+  margin: 8px 0;
+  color: #ccc;
+}
+
+.info strong {
+  color: #fff;
+  font-weight: 500;
+}
+
+/* Game Board - 5x5 Grid */
+.board {
+  display: grid;
+  grid-template-columns: repeat(5, 70px);
+  grid-template-rows: repeat(5, 70px);
+  gap: 4px;
+  margin: 0 auto;
+}
+
+.square {
+  background-color: #2a2a2a;
+  border: 1px solid #333;
+  display: flex;
   align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  font-size: 24px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-radius: 4px;
+  color: #ccc;
 }
 
-.App-link {
-  color: #61dafb;
+.square:hover {
+  background-color: #333;
+  border-color: #444;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.square:active {
+  transform: scale(0.95);
+}
+
+/* Odd numbers = subtle blue */
+.square.odd {
+  color: #89CFF0;
+  border-color: #2a2a2a;
+}
+
+/* Even numbers = subtle green */
+.square.even {
+  color: #98FB98;
+  border-color: #2a2a2a;
+}
+
+.waiting {
+  color: #ffa500;
+  font-size: 20px;
+  margin-top: 20px;
+  animation: blink 1.5s infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.instructions {
+  font-size: 16px;
+  color: #aaa;
+  margin: 20px auto;
+  max-width: 500px;
+  text-align: center;
+}
+
+/* Game Over Section */
+.game-over {
+  background-color: #2a2a2a;
+  padding: 30px;
+  border-radius: 8px;
+  text-align: left;
+  height: 50%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.game-over h2 {
+  color: #fff;
+  margin: 0 0 20px 0;
+  font-size: 24px;
+  font-weight: 500;
+}
+
+.winner {
+  font-size: 20px;
+  font-weight: 500;
+  margin: 0 0 10px 0;
+}
+
+.winner.odd {
+  color: #89CFF0;
+}
+
+.winner.even {
+  color: #98FB98;
+}
+
+.winner-info {
+  color: #ccc;
+  font-size: 16px;
+  margin: 10px 0 20px;
+}
+
+/* New Game Button */
+.new-game-btn {
+  margin-top: auto;
+  padding: 12px 20px;
+  font-size: 14px;
+  background-color: #333;
+  border: 1px solid #444;
+  border-radius: 4px;
+  color: #fff;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  width: fit-content;
+}
+
+.new-game-btn:hover {
+  background-color: #444;
+  border-color: #555;
+}
+
+/* Winning Squares - More subtle highlight */
+.square.winning {
+  background-color: #333;
+  border-color: #444;
+  position: relative;
+}
+
+.square.winning::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border: 1px solid currentColor;
+  border-radius: 4px;
+  opacity: 0.5;
 }

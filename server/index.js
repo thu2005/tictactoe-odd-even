@@ -6,6 +6,71 @@ console.log("WebSocket server started on ws://localhost:8081");
 let board = Array(25).fill(0);
 let players = { odd: null, even: null };
 let gameStatus = "waiting";
+const winningLines = [
+  // row
+  [0, 1, 2, 3, 4],
+  [5, 6, 7, 8, 9],
+  [10, 11, 12, 13, 14],
+  [15, 16, 17, 18, 19],
+  [20, 21, 22, 23, 24],
+  // column
+  [0, 5, 10, 15, 20],
+  [1, 6, 11, 16, 21],
+  [2, 7, 12, 17, 22],
+  [3, 8, 13, 18, 23],
+  [4, 9, 14, 19, 24],
+  // diagonal
+  [0, 6, 12, 18, 24],
+  [4, 8, 12, 16, 20],
+];
+
+// function to check if there's a winner
+function checkWinner() {
+  console.log("Checking winner ... Board: ", board);
+
+  for (const line of winningLines) {
+    const values = line.map((index) => board[index]);
+
+    // check if all 5 numbers are odd
+    const allOdd = values.every((v) => v > 0 && v % 2 === 1);
+    if (allOdd) {
+      return { winner: "ODD", line: line };
+    }
+
+    // check if all 5 numbers are even
+    const allEven = values.every((v) => v > 0 && v % 2 === 0);
+    if (allEven) {
+      return { winner: "EVEN", line: line };
+    }
+  }
+  return null; // no winner yet
+}
+
+// Function to broadcast to all connected clients
+function broadcast(message) {
+  if (players.odd && players.odd.readyState === WebSocket.OPEN) {
+    players.odd.send(message);
+  }
+  if (players.even && players.even.readyState === WebSocket.OPEN) {
+    players.even.send(message);
+  }
+}
+
+// Function to reset game
+function resetGame() {
+  board = Array(25).fill(0);
+  gameStatus = "playing";
+  
+  // Broadcast reset to all clients
+  const resetMessage = JSON.stringify({
+    type: "RESET_GAME",
+    board: board,
+    gameStatus: gameStatus
+  });
+  
+  broadcast(resetMessage);
+  console.log("Game reset!");
+}
 
 wss.on("connection", (ws) => {
   console.log("new client connected");
@@ -34,6 +99,14 @@ wss.on("connection", (ws) => {
     ws.close();
     return;
   }
+  if (players.odd && players.odd.readyState === WebSocket.OPEN) {
+    players.odd.send(
+      JSON.stringify({
+        type: "GAME_START",
+        gameStatus: "playing",
+      })
+    );
+  }
 
   // Send PLAYER_ASSIGNED message to this client
   ws.send(
@@ -49,6 +122,12 @@ wss.on("connection", (ws) => {
     try {
       const data = JSON.parse(message);
       console.log("Received: ", data);
+
+      // Handle NEW_GAME message
+      if (data.type === "NEW_GAME") {
+        resetGame();
+        return;
+      }
 
       if (data.type === "INCREMENT") {
         const square = data.square;
@@ -82,6 +161,28 @@ wss.on("connection", (ws) => {
         }
         if (players.even && players.even.readyState === WebSocket.OPEN) {
           players.even.send(updateMessage);
+        }
+
+        // check for winner
+        const result = checkWinner();
+        if (result) {
+          gameStatus = "finished";
+          console.log(`Player ${result.winner} wins!`);
+          console.log("Winning line: ", result.line);
+
+          // broadcast GAME_OVER to all clients
+          const gameOverMessage = JSON.stringify({
+            type: "GAME_OVER",
+            winner: result.winner,
+            winningLine: result.line,
+          });
+
+          if (players.odd && players.odd.readyState === WebSocket.OPEN) {
+            players.odd.send(gameOverMessage);
+          }
+          if (players.even && players.even.readyState === WebSocket.OPEN) {
+            players.even.send(gameOverMessage);
+          }
         }
       }
     } catch (e) {
